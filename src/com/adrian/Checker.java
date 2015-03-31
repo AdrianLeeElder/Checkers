@@ -11,11 +11,8 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 
 public class Checker extends Ellipse2D.Double {
-    
+  private static ArrayList<Checker> checkers = new ArrayList<Checker>();
   private static double checkerSize = Tile.getTileSize() - 20;
-  
-  private static ArrayList<Checker> checkersComputer = new ArrayList<Checker>();
-  private static ArrayList<Checker> checkersPlayer = new ArrayList<Checker>();
   
   private static double oldX, oldY = 0;
 
@@ -24,25 +21,31 @@ public class Checker extends Ellipse2D.Double {
   private boolean isSelected = false;
   
   private int currentTileNumber = -1;
+  private boolean playerOnePiece = false;
+  private boolean playerTwoPiece = false;
+  private boolean crownedPiece = false;
   
-  public Checker(double x, double y, double width, double height) {
+  public Checker(double x, double y, double width, double height, boolean playerOne, boolean playerTwo) {
     super(x, y, width, height);
-  }
-  
-  public static ArrayList<Checker> getCheckersComputer() {
-    return checkersComputer;
-  }
-  
-  public static ArrayList<Checker> getCheckersPlayer() {
-    return checkersPlayer;
+    
+    this.playerOnePiece = playerOne;
+    this.playerTwoPiece = playerTwo;
   }
     
-    public static Color getFillColorPlayer() {
+    public static Color getFillColorPlayerOne() {
       return Color.white;
     }
     
-    public static Color getFillColorComputer() {
+    public static Color getFillColorPlayerTwo() {
       return Color.red;
+    }
+    
+    public static Color getCrownFillColorOne() {
+    	return Color.cyan;
+    }
+    
+    public static Color getCrownFillColorTwo() {
+    	return Color.green;
     }
     
     public int getCheckerNumber() {
@@ -82,7 +85,7 @@ public class Checker extends Ellipse2D.Double {
     }
     
     public static Checker getSelectedChecker() {
-        for(Checker c: getCheckersPlayer()) {
+        for(Checker c: Checker.getCheckers()) {
             if(c.isSelected()) return c;
         }
         return null;
@@ -94,6 +97,22 @@ public class Checker extends Ellipse2D.Double {
 
 	public void setCurrentTile(int i) {
 		currentTileNumber = i;	
+	}
+	
+	public boolean isPlayerOnePiece() {
+		return playerOnePiece;
+	}
+	
+	public boolean isPlayerTwoPiece() {
+		return playerTwoPiece;
+	}
+	
+	public static ArrayList<Checker> getCheckers() {
+		return checkers;
+	}
+	
+	public boolean isCrowned() {
+		return crownedPiece;
 	}
 
 }
