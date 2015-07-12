@@ -560,8 +560,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	private boolean canMoveToTile(Checker c) {    	
 		if(isPlayerTurn(c) && isPlayable(potentialTileNumber) && !needsToTakeOtherJump(c) && 
 				(((isDiagonalXTilesFromChecker(c, 1) || (isDiagonalXTilesFromChecker(c, 2)) && clearForLanding()) || hasJumps(c)))) {
-			if(!c.isCrowned() && (getDirectionOfMove(c) == SE || getDirectionOfMove(c) == SW)) {
-				println("Only crowned pieces can move backwards.");
+			if(!validMoveDirection(c)) {
 				return false;
 			}
 			if(Player.getPlayers().get(Player.PLAYER_ONE).isPlayerTurn()) {
@@ -577,7 +576,16 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		println("Move failed");
 		return false;
 	}
-
+	
+	private boolean validMoveDirection(Checker c) {
+		if(!c.isCrowned() && ((getDirectionOfMove(c) == SE || getDirectionOfMove(c) == SW)
+				|| getDirectionOfJump(c) == SE || getDirectionOfJump(c) == SW)) {
+			println("Only crowned pieces can move backwards.");
+			return false;
+		} else {
+			return true;
+		}
+	}
 	private boolean clearForLanding() {
 		if (Tile.getCheckerTiles()[potentialTileNumber].hasChecker()) {
 			println("Can't move to a space where a checker is");
@@ -609,7 +617,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 
 	private boolean checkerInMiddleTile(Checker c) {
 		if(getMiddleTile(c) == -1) {
-			println("There is no checker in between to jumpm!");
+			println("There is no checker in between to jump!");
 			return false;
 		} else {
 			return Tile.getCheckerTiles()[getMiddleTile(c)].hasChecker();
@@ -639,13 +647,25 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 
 		int difference = potentialTileNumber - c.getCurrentTileNumber();
 		println("The direction of the jump is "+ difference);
-		switch(difference) {
-		case -14: return SW;
-		case -18: return SE;
-		case 18: return NW;
-		case 14: return NE;
+		
+		if(c.isPlayerOnePiece()) {
+			switch(difference) {
+			case 14: return SW;
+			case 18: return SE;
+			case -18: return NW;
+			case -14: return NE;
 
-		default: return -1;
+			default: return -1;
+			}
+		} else {
+			switch(difference) {
+			case -14: return SW;
+			case -18: return SE;
+			case 18: return NW;
+			case 14: return NE;
+
+			default: return -1;
+			}
 		}
 	}
 
@@ -674,7 +694,6 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 			default: return -1;
 			}
 		}
-
 	}
 
 
