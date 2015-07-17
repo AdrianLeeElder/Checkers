@@ -13,16 +13,16 @@ import java.awt.geom.*;
  * Auto Generated Java Class.
  */
 public class Tile extends Rectangle2D.Double {
-  private int tileNumber = 0;
+  private byte tileNumber = 0;
   private static double tileSize = (Main.canvasWidth / 8);
   private static Tile[] checkerTiles = new Tile[64];
-  private int currentCheckerNumber = -1;
+  private byte currentCheckerNumber = -1;
   
   public Tile(double x, double y, double w, double h) {
     super(x, y, w, h);
   }
   
-  public int getTileNumber() {
+  public byte getTileNumber() {
     return this.tileNumber;
   }
   
@@ -30,7 +30,7 @@ public class Tile extends Rectangle2D.Double {
     return checkerTiles;
   }
   
-  public void setTileNumber(int i) {
+  public void setTileNumber(byte i) {
     this.tileNumber = i;
   }
   
@@ -38,11 +38,11 @@ public class Tile extends Rectangle2D.Double {
     return tileSize;
   }
   
-  public int getCurrentCheckerNumber() {
+  public byte getCurrentCheckerNumber() {
 	  return currentCheckerNumber;
   }
   
-  public void setCurrentCheckerNumber(int number) {
+  public void setCurrentCheckerNumber(byte number) {
 	  currentCheckerNumber = number;
   }
   

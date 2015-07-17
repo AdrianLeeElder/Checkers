@@ -11,16 +11,16 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 
 public class Checker extends Ellipse2D.Double {
-  private static ArrayList<Checker> checkers = new ArrayList<Checker>();
+  private static Checker[] checkers = new Checker[24];
   private static double checkerSize = Tile.getTileSize() - 20;
   
   private static double oldX, oldY = 0;
 
-  private int checkerNumber = 0;
+  private byte checkerNumber = 0;
   
   private boolean isSelected = false;
   
-  private int currentTileNumber = -1;
+  private byte currentTileNumber = -1;
   private boolean playerOnePiece = false;
   private boolean playerTwoPiece = false;
   private boolean crownedPiece = false;
@@ -48,11 +48,11 @@ public class Checker extends Ellipse2D.Double {
     	return Color.green;
     }
     
-    public int getCheckerNumber() {
+    public byte getCheckerNumber() {
         return checkerNumber;
     }
     
-    public void setCheckerNumber(int checkerNumber) {
+    public void setCheckerNumber(byte checkerNumber) {
         this.checkerNumber = checkerNumber;
     }
     
@@ -86,16 +86,17 @@ public class Checker extends Ellipse2D.Double {
     
     public static Checker getSelectedChecker() {
         for(Checker c: Checker.getCheckers()) {
+        	if(c == null) continue;
             if(c.isSelected()) return c;
         }
         return null;
     }
     
-    public int getCurrentTileNumber() {
+    public byte getCurrentTileNumber() {
     	return currentTileNumber;
     }
 
-	public void setCurrentTile(int i) {
+	public void setCurrentTile(byte i) {
 		currentTileNumber = i;	
 	}
 	
@@ -107,7 +108,7 @@ public class Checker extends Ellipse2D.Double {
 		return playerTwoPiece;
 	}
 	
-	public static ArrayList<Checker> getCheckers() {
+	public static Checker[] getCheckers() {
 		return checkers;
 	}
 	

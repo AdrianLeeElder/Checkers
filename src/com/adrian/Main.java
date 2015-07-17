@@ -44,7 +44,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 
 	//store the tile number we are trying to move to so
 	//we don't have to keep running the getTileNumberForPoint method 
-	static int potentialTileNumber = -1;
+	static byte potentialTileNumber = -1;
 	public static void init() {
 
 		JFrame frame = new JFrame("Testing");
@@ -129,30 +129,29 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 
 		if(c != null && potentialTileNumber != -1) {
 			if(canMoveToTile(c)) {
-				c.x = Tile.getCheckerTiles()[potentialTileNumber].getX() + (Tile.getTileSize() / 8);
-				c.y = Tile.getCheckerTiles()[potentialTileNumber].getY() + (Tile.getTileSize() / 8);
-
-				//clear out the checker number for the tile the checker is moving from
-				Tile.getCheckerTiles()[c.getCurrentTileNumber()].setCurrentCheckerNumber(-1);
-
-				//set the checker number of the tile that we are moving to to the current checker number
-				Tile.getCheckerTiles()[potentialTileNumber].setCurrentCheckerNumber(c.getCheckerNumber());
-
-				c.setCurrentTile(potentialTileNumber);
-				println("Attempting to move to tile " + potentialTileNumber);
-				repaint();
-
-
+				moveChecker(potentialTileNumber, c);
+				changeTurns();
+			} 
+			else if(canJumpToTile(c)) {
+				removeJumpedChecker(c);
+				moveChecker(potentialTileNumber, c);
+				if(!currentJumpingPieceHasJumps()) {
+					changeTurns();
+				}
 			} else {
-				//move the checker piece back to its original location
-				c.x = Checker.getOldX();
-				c.y = Checker.getOldY();
-				c.setCheckerNumber(c.getCheckerNumber());
-				potentialTileNumber = -1;
+				revertPiece(c);
 			}
+		}
+		if(c != null) {
 			c.setSelected(false);
 		}
 		repaint();
+	}
+	private void revertPiece(Checker c) {
+		c.x = Checker.getOldX();
+		c.y = Checker.getOldY();
+		c.setCheckerNumber(c.getCheckerNumber());
+		potentialTileNumber = -1;
 	}
 	@Override
 	public void mouseDragged(MouseEvent e) {
@@ -189,6 +188,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	public Checker getCheckerForMouseLoc(Point p) {
 		double dx, dy, radius, radiusSquared, distanceSquared;
 		for(Checker c : Checker.getCheckers()) {
+			if(c == null) continue;
 			dx = c.getCenterX() - p.getX();
 			dy = c.getCenterY() - p.getY();
 			dx *= dx;//square the distance
@@ -318,7 +318,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		createInitialTile(g2);
 
 		if(!tilesCreated) {
-			for(int i=1; i < 64; i++) {
+			for(byte i=1; i < 64; i++) {
 				createTiles(g2, i);
 				if(i < 24 || i > 39) {
 					if(isPlayable(i)) {
@@ -341,6 +341,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		long startTime = System.currentTimeMillis();
 		long endTime;
 		for(Checker c : Checker.getCheckers()) {
+			if(c == null) continue;
 			if(c.isPlayerTwoPiece()) {
 				g2.setPaint(Checker.getFillColorPlayerTwo());
 				g2.fill(c);
@@ -349,6 +350,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		}
 
 		for(Checker c : Checker.getCheckers()) {
+			if(c == null) continue;
 			if(c.isPlayerOnePiece()) {
 				g2.setPaint(Checker.getFillColorPlayerOne());
 				g2.fill(c);
@@ -380,7 +382,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		g2.setPaint(Color.red);
 		g2.fill(Tile.getCheckerTiles()[0]);
 	}
-	public void createTiles(Graphics2D g2, int i) {    
+	public void createTiles(Graphics2D g2, byte i) {    
 		if(i < 8) {
 			Tile.getCheckerTiles()[i] = new Tile(Tile.getCheckerTiles()[i-1].getX() + Tile.getTileSize(), startingCheckerY, Tile.getTileSize(), Tile.getTileSize());
 		} else if(i < 16) {
@@ -417,33 +419,33 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	}
 
 	//count number to keep track of which checker piece to render
-	int checkerNumber = 0;
-	public void createCheckers(int i, Graphics2D g2) {
+	byte checkerNumber = 0;
+	public void createCheckers(byte i, Graphics2D g2) {
 		if(i < 24) {
 			g2.setPaint(Checker.getFillColorPlayerTwo());
-			Checker.getCheckers().add(checkerNumber, new Checker((Tile.getCheckerTiles()[i].getX() + (Checker.getCheckerSize() / 8)), (Tile.getCheckerTiles()[i].getY() + (Checker.getCheckerSize() / 8)), Checker.getCheckerSize(), Checker.getCheckerSize(), false, true));
-			g2.fill(Checker.getCheckers().get(checkerNumber));   
-			g2.draw(Checker.getCheckers().get(checkerNumber));  
-			Checker.getCheckers().get(checkerNumber).setCheckerNumber(checkerNumber);
-			Checker.getCheckers().get(checkerNumber).setCurrentTile(i);
+			Checker.getCheckers()[checkerNumber] = new Checker((Tile.getCheckerTiles()[i].getX() + (Checker.getCheckerSize() / 8)), (Tile.getCheckerTiles()[i].getY() + (Checker.getCheckerSize() / 8)), Checker.getCheckerSize(), Checker.getCheckerSize(), false, true);
+			g2.fill(Checker.getCheckers()[checkerNumber]);   
+			g2.draw(Checker.getCheckers()[checkerNumber]);  
+			Checker.getCheckers()[checkerNumber].setCheckerNumber(checkerNumber);
+			Checker.getCheckers()[checkerNumber].setCurrentTile(i);
 			Tile.getCheckerTiles()[i].setCurrentCheckerNumber(checkerNumber);
 			checkerNumber++; 
 			println("Player two checker number #" + checkerNumber + " successfully");
 		} else {
 			g2.setPaint(Checker.getFillColorPlayerOne());
-			Checker.getCheckers().add(checkerNumber, new Checker((Tile.getCheckerTiles()[i].getX() + (Checker.getCheckerSize() / 8)), (Tile.getCheckerTiles()[i].getY() + (Checker.getCheckerSize() / 8)), Checker.getCheckerSize(), Checker.getCheckerSize(), true, false));
-			g2.fill(Checker.getCheckers().get(checkerNumber));   
-			g2.draw(Checker.getCheckers().get(checkerNumber));   
-			Checker.getCheckers().get(checkerNumber).setCheckerNumber(checkerNumber);
-			Checker.getCheckers().get(checkerNumber).setCurrentTile(i);
+			Checker.getCheckers()[checkerNumber] = new Checker((Tile.getCheckerTiles()[i].getX() + (Checker.getCheckerSize() / 8)), (Tile.getCheckerTiles()[i].getY() + (Checker.getCheckerSize() / 8)), Checker.getCheckerSize(), Checker.getCheckerSize(), true, false);
+			g2.fill(Checker.getCheckers()[checkerNumber]);   
+			g2.draw(Checker.getCheckers()[checkerNumber]);  
+			Checker.getCheckers()[checkerNumber].setCheckerNumber(checkerNumber);
+			Checker.getCheckers()[checkerNumber].setCurrentTile(i);
 			Tile.getCheckerTiles()[i].setCurrentCheckerNumber(checkerNumber);
 			checkerNumber++;
 			println("Player one checker number #" + checkerNumber + " created successfully");
 		}
 
 		if(debugFeatures) {
-			println("Rendered " + Checker.getCheckers().size() + " checker(s) for player two");
-			println("Rendered " + Checker.getCheckers().size() + " checker(s) for player one");
+			println("Rendered " + Checker.getCheckers().length + " checker(s) for player two");
+			println("Rendered " + Checker.getCheckers().length + " checker(s) for player one");
 		}
 		if(i == 62) {
 			println("Checkers creation finished.");
@@ -468,6 +470,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	public static void addLabelsToCheckers(Graphics2D g2) {
 		g2.setPaint(Color.white);
 		for (Checker c : Checker.getCheckers()) {
+			if(c == null) continue;
 			if(c.isPlayerOnePiece()) {
 				g2.setPaint(Color.black);
 				g2.drawString("#"+ c.getCheckerNumber(), (int) c.getCenterX(), (int) c.getCenterY() - 5);
@@ -525,9 +528,9 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	private boolean isPlayerTurn(Checker c) {
 		ArrayList<Player> players = Player.getPlayers();
 
-		if(players.get(Player.PLAYER_ONE).isPlayerTurn() && Checker.getCheckers().get(c.getCheckerNumber()).isPlayerOnePiece()) {
+		if(players.get(Player.PLAYER_ONE).isPlayerTurn() && Checker.getCheckers()[c.getCheckerNumber()].isPlayerOnePiece()) {
 			return true;
-		} else if(players.get(Player.PLAYER_TWO).isPlayerTurn() && Checker.getCheckers().get(c.getCheckerNumber()).isPlayerTwoPiece()) {
+		} else if(players.get(Player.PLAYER_TWO).isPlayerTurn() && Checker.getCheckers()[c.getCheckerNumber()].isPlayerTwoPiece()) {
 			return true;
 		} else {
 			println("It's not your turn, move a white piece for player one and a red for player two.");
@@ -558,25 +561,22 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param tileNumber Which tile number to move to
 	 */
 	private boolean canMoveToTile(Checker c) {    	
-		if(isPlayerTurn(c) && isPlayable(potentialTileNumber) && !needsToTakeOtherJump(c) && 
-				(((isDiagonalXTilesFromChecker(c, 1) || (isDiagonalXTilesFromChecker(c, 2)) && clearForLanding()) || hasJumps(c)))) {
+		if(currentJumpingPiece != null && (currentJumpingPiece != c && currentJumpingPieceHasJumps())) {
+			println("The last jumping piece still has another jump.");
+			return false;
+		}
+		if(isPlayerTurn(c) && clearForLanding(potentialTileNumber) && isDiagonalXTilesFromChecker(c, 1)) {
 			if(!validMoveDirection(c)) {
 				return false;
 			}
-			if(Player.getPlayers().get(Player.PLAYER_ONE).isPlayerTurn()) {
-				setTurn(Player.PLAYER_ONE, false);
-				setTurn(Player.PLAYER_TWO, true);
-			} else {
-				setTurn(Player.PLAYER_ONE, true);
-				setTurn(Player.PLAYER_TWO, false);
-			}
-			println("Direction " + getDirectionOfMove(c));
 			return true;
 		}
 		println("Move failed");
 		return false;
 	}
-	
+
+
+
 	private boolean validMoveDirection(Checker c) {
 		if(!c.isCrowned() && ((getDirectionOfMove(c) == SE || getDirectionOfMove(c) == SW)
 				|| getDirectionOfJump(c) == SE || getDirectionOfJump(c) == SW)) {
@@ -586,8 +586,8 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 			return true;
 		}
 	}
-	private boolean clearForLanding() {
-		if (Tile.getCheckerTiles()[potentialTileNumber].hasChecker()) {
+	private boolean clearForLanding(int tileNumber) {
+		if (Tile.getCheckerTiles()[tileNumber].hasChecker()) {
 			println("Can't move to a space where a checker is");
 			return false;
 		} else {
@@ -595,32 +595,74 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		}
 	}
 
-	private int getOtherJumps(Checker c) {
-		int otherJumps = 0;
-		for(Checker c2: Checker.getCheckers()) {
-			if(c2.getCheckerNumber() == c.getCheckerNumber()) continue;
-			if(hasJumps(c)) {
-				otherJumps++;
-			}
+	//	private int getOtherJumps(Checker c) {
+	//		int otherJumps = 0;
+	//		for(Checker c2: Checker.getCheckers()) {
+	//			if(c2.getCheckerNumber() == c.getCheckerNumber()) continue;
+	//			if(hasJumps(c)) {
+	//				otherJumps++;
+	//			}
+	//		}
+	//		return otherJumps;
+	//	}
+
+	private Checker currentJumpingPiece = null;
+
+	private boolean currentJumpingPieceHasJumps() {
+		if(currentJumpingPiece == null) {
+			return false;
 		}
-		return otherJumps;
+		Checker c;
+		c = currentJumpingPiece;
+		byte currentTileNumber = c.getCurrentTileNumber();
+		
+		if(!c.isCrowned()) {
+			if(c.isPlayerOnePiece()) {
+				if(((clearForLanding(currentTileNumber - 18) && Tile.getCheckerTiles()[currentTileNumber - 9].hasChecker()) ||
+						(clearForLanding(currentTileNumber - 7) && Tile.getCheckerTiles()[currentTileNumber - 14].hasChecker()))) {
+					return true;
+				}
+			} else if(c.isPlayerTwoPiece()) {
+				if(((clearForLanding(currentTileNumber + 18) && Tile.getCheckerTiles()[currentTileNumber + 9].hasChecker()) ||
+						(clearForLanding(currentTileNumber + 7) && Tile.getCheckerTiles()[currentTileNumber + 14].hasChecker()))) {
+					return true;
+				}
+			}
+		} else if(c.isCrowned() && 
+				(((clearForLanding(currentTileNumber - 18) && Tile.getCheckerTiles()[currentTileNumber - 9].hasChecker()) ||
+						(clearForLanding(currentTileNumber - 7) && Tile.getCheckerTiles()[currentTileNumber - 14].hasChecker()))) ||
+						((clearForLanding(currentTileNumber + 18) && Tile.getCheckerTiles()[currentTileNumber + 9].hasChecker()) ||
+								(clearForLanding(currentTileNumber + 7) && Tile.getCheckerTiles()[currentTileNumber + 14].hasChecker()))) {
+			return true;
+		} 
+
+		return false;
 	}
 
-	private boolean hasJumps(Checker c) {
-		if(isDiagonalXTilesFromChecker(c, 2) && checkerInMiddleTile(c) && clearForLanding()) {
+	private boolean canJumpToTile(Checker c) {
+		if(currentJumpingPiece != null && (currentJumpingPiece != c && currentJumpingPieceHasJumps())) {
+			println("The last jumping piece still has another jump.");
+			return false;
+		}
+		if(!validMoveDirection(c)) {
+			return false;
+		}
+		if(isPlayerTurn(c) && isDiagonalXTilesFromChecker(c, 2) && getMiddleTile(c).hasChecker() && clearForLanding(potentialTileNumber)) {
 			println("Attempting to take jump");
+			currentJumpingPiece = c;//now the program knows the last jumping piece
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	private boolean checkerInMiddleTile(Checker c) {
-		if(getMiddleTile(c) == -1) {
-			println("There is no checker in between to jump!");
-			return false;
+	private void changeTurns() {
+		if(Player.getPlayers().get(Player.PLAYER_ONE).isPlayerTurn()) {
+			setTurn(Player.PLAYER_ONE, false);
+			setTurn(Player.PLAYER_TWO, true);
 		} else {
-			return Tile.getCheckerTiles()[getMiddleTile(c)].hasChecker();
+			setTurn(Player.PLAYER_ONE, true);
+			setTurn(Player.PLAYER_TWO, false);
 		}
 	}
 
@@ -631,23 +673,76 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	//		}
 	//	}
 
-	private int getMiddleTile(Checker c) {
-		switch(getDirectionOfJump(c)) {
-		case 0: return c.getCurrentTileNumber() - 7;
-		case 1: return c.getCurrentTileNumber() + 9;
-		case 2: return c.getCurrentTileNumber() + 7;
-		case 3: return c.getCurrentTileNumber() - 8;
+	private void moveChecker(byte potentialTileNumber, Checker c) {
+		c.x = Tile.getCheckerTiles()[potentialTileNumber].getX() + (Tile.getTileSize() / 8);
+		c.y = Tile.getCheckerTiles()[potentialTileNumber].getY() + (Tile.getTileSize() / 8);
 
-		default: return -1;
-		}
+		//clear out the checker number for the tile the checker is moving from
+		Tile.getCheckerTiles()[c.getCurrentTileNumber()].setCurrentCheckerNumber((byte) -1);
+
+		//set the checker number of the tile that we are moving to to the current checker number
+		Tile.getCheckerTiles()[potentialTileNumber].setCurrentCheckerNumber(c.getCheckerNumber());
+
+		c.setCurrentTile(potentialTileNumber);
+		println("Attempting to move to tile " + potentialTileNumber);
 	}
 
+	private void removeJumpedChecker(Checker c) {
+		Tile middleTile = getMiddleTile(c);
+		int checkerNumber = middleTile.getCurrentCheckerNumber();
+		println("Attempting to remove checker #" + checkerNumber +" from tile #" + middleTile.getTileNumber());
+		Checker.getCheckers()[checkerNumber] = null;
+		middleTile.setCurrentCheckerNumber((byte) -1);
+	}
+	//jumping checker 9 with 13, 12 behind checker
+	private Tile getMiddleTile(Checker c) {
+		if(c.isPlayerOnePiece()) {
+			switch(getDirectionOfJump(c)) {
+			case 0: return Tile.getCheckerTiles()[c.getCurrentTileNumber() - 7];
+			case 1: return Tile.getCheckerTiles()[c.getCurrentTileNumber() + 9];
+			case 2: return Tile.getCheckerTiles()[c.getCurrentTileNumber() + 7];
+			case 3: return Tile.getCheckerTiles()[c.getCurrentTileNumber() - 9];
+
+			default: return null;
+			}
+		} else {
+			switch(getDirectionOfJump(c)) {
+			case 0: return Tile.getCheckerTiles()[c.getCurrentTileNumber() + 7];
+			case 1: return Tile.getCheckerTiles()[c.getCurrentTileNumber() - 9];
+			case 2: return Tile.getCheckerTiles()[c.getCurrentTileNumber() - 7];
+			case 3: return Tile.getCheckerTiles()[c.getCurrentTileNumber() + 9];
+
+			default: return null;
+			}
+		}
+	}
+	private String getDirectionToString(Checker c, int difference) {
+		if(c.isPlayerOnePiece()) {
+			switch(difference) {
+			case 14: return "South West";
+			case 18: return "South East";
+			case -18: return "North West";
+			case -14: return "North East";
+
+			default: return "Invalid Direction";
+			}
+		} else {
+			switch(difference) {
+			case -14: return "South West";
+			case -18: return "South East";
+			case 18: return "North West";
+			case 14: return "North East";
+
+			default: return "Invalid Direction";
+			}
+		}
+	}
 	private int getDirectionOfJump(Checker c) {
 		byte NE = 0, SE = 1, SW = 2, NW = 3;
 
 		int difference = potentialTileNumber - c.getCurrentTileNumber();
-		println("The direction of the jump is "+ difference);
-		
+		println("The direction of the jump is "+ getDirectionToString(c, difference));
+
 		if(c.isPlayerOnePiece()) {
 			switch(difference) {
 			case 14: return SW;
@@ -698,37 +793,37 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 
 
 
-	private boolean needsToTakeOtherJump(Checker c) {
-		if(!hasJumps(c) && getOtherJumps(c) > 0) {
-			println("You have to take your jumps");
-			return true;
-		}
-		return false;
-	}
+	//	private boolean needsToTakeOtherJump(Checker c) {
+	//		if(!canTakeJump(c) && getOtherJumps(c) > 0) {
+	//			println("You have to take your jumps");
+	//			return true;
+	//		}
+	//		return false;
+	//	}
 	/*
 	 * detect if a tile is diagonal @tileCount times
 	 */
 	private boolean isDiagonalXTilesFromChecker(Checker c, int x) {
-//		if((Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].x - Tile.getCheckerTiles()[potentialTileNumber].x) == (Tile.getTileSize() * x))
-//				&& (Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].y - (Tile.getCheckerTiles()[potentialTileNumber].y)) == (Tile.getTileSize() * x))) {
-//			return true;
-			
-			if((Math.abs(c.getCurrentTileNumber() - potentialTileNumber) == 7 * x) || Math.abs(c.getCurrentTileNumber() - potentialTileNumber) == 9 * x) {
-				println("The potential tile ("+ potentialTileNumber +" is diagonal of the current tile ("+ c.getCurrentTileNumber() +".");
-				return true;
+		//		if((Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].x - Tile.getCheckerTiles()[potentialTileNumber].x) == (Tile.getTileSize() * x))
+		//				&& (Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].y - (Tile.getCheckerTiles()[potentialTileNumber].y)) == (Tile.getTileSize() * x))) {
+		//			return true;
+
+		if((Math.abs(c.getCurrentTileNumber() - potentialTileNumber) == 7 * x) || Math.abs(c.getCurrentTileNumber() - potentialTileNumber) == 9 * x) {
+			println("The potential tile ("+ potentialTileNumber +" is diagonal of the current tile ("+ c.getCurrentTileNumber() +".");
+			return true;
 		} else {
 			println("Not a diagonal jump within the alloted distance. "+ Math.abs(c.getCurrentTileNumber() - potentialTileNumber) +"");
-//			println("Tile is not diagonal. Current checker #"+ c.getCheckerNumber() + ", Potential tile #"+potentialTileNumber+".");
-//			println("Current tile #" +c.getCurrentTileNumber());
-//
-//			println("Expected" + Tile.getTileSize() * x +", actual x: " + Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].x - Tile.getCheckerTiles()[potentialTileNumber].x));
-//			println("Expected" + Tile.getTileSize() * x +", actual y: " + Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].y - Tile.getCheckerTiles()[potentialTileNumber].y));
+			//			println("Tile is not diagonal. Current checker #"+ c.getCheckerNumber() + ", Potential tile #"+potentialTileNumber+".");
+			//			println("Current tile #" +c.getCurrentTileNumber());
+			//
+			//			println("Expected" + Tile.getTileSize() * x +", actual x: " + Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].x - Tile.getCheckerTiles()[potentialTileNumber].x));
+			//			println("Expected" + Tile.getTileSize() * x +", actual y: " + Math.abs(Tile.getCheckerTiles()[c.getCurrentTileNumber()].y - Tile.getCheckerTiles()[potentialTileNumber].y));
 			return false;
 		}
 	}
 
-	private int getTileNumberForPoint(Point p) {
-		for(int i = 0; i < Tile.getCheckerTiles().length; i++) {
+	private byte getTileNumberForPoint(Point p) {
+		for(byte i = 0; i < Tile.getCheckerTiles().length; i++) {
 			if((p.x - Tile.getCheckerTiles()[i].getX()) <= Tile.getTileSize() 
 					&& p.y - Tile.getCheckerTiles()[i].getY() <= Tile.getTileSize()) {
 				return Tile.getCheckerTiles()[i].getTileNumber();
