@@ -619,8 +619,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 			changeTurns();
 			return false;
 		}
-
-
+		
 		if(!c.isCrowned()) {
 			if(c.isPlayerOnePiece()) {
 				if(((clearForLanding(currentTileNumber - 14) && Tile.getCheckerTiles()[currentTileNumber - 7].hasChecker()) ||
