@@ -135,9 +135,6 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 			else if(canJumpToTile(c)) {
 				removeJumpedChecker(c);
 				moveChecker(potentialTileNumber, c);
-				if(!currentJumpingPieceHasJumps()) {
-					changeTurns();
-				}
 			} else {
 				revertPiece(c);
 			}
@@ -561,7 +558,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param tileNumber Which tile number to move to
 	 */
 	private boolean canMoveToTile(Checker c) {    	
-		if(currentJumpingPiece != null && (currentJumpingPiece != c && currentJumpingPieceHasJumps())) {
+		if(currentJumpingPiece != null && (currentJumpingPieceHasJumps() && currentJumpingPiece != c)) {
 			println("The last jumping piece still has another jump.");
 			return false;
 		}
@@ -609,30 +606,38 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	private Checker currentJumpingPiece = null;
 
 	private boolean currentJumpingPieceHasJumps() {
-		if(currentJumpingPiece == null) {
-			return false;
-		}
 		Checker c;
 		c = currentJumpingPiece;
 		byte currentTileNumber = c.getCurrentTileNumber();
 		
+		if(currentJumpingPiece == null) {
+			return false;
+		}
+
+		if((currentTileNumber - 14 < 1) || (currentTileNumber - 18 < 1) || (currentTileNumber + 18 > 62) || currentTileNumber + 14 > 62) {
+			currentJumpingPiece = null;
+			changeTurns();
+			return false;
+		}
+
+
 		if(!c.isCrowned()) {
 			if(c.isPlayerOnePiece()) {
-				if(((clearForLanding(currentTileNumber - 18) && Tile.getCheckerTiles()[currentTileNumber - 9].hasChecker()) ||
-						(clearForLanding(currentTileNumber - 7) && Tile.getCheckerTiles()[currentTileNumber - 14].hasChecker()))) {
+				if(((clearForLanding(currentTileNumber - 14) && Tile.getCheckerTiles()[currentTileNumber - 7].hasChecker()) ||
+						(clearForLanding(currentTileNumber - 18) && Tile.getCheckerTiles()[currentTileNumber - 9].hasChecker()))) {
 					return true;
 				}
 			} else if(c.isPlayerTwoPiece()) {
-				if(((clearForLanding(currentTileNumber + 18) && Tile.getCheckerTiles()[currentTileNumber + 9].hasChecker()) ||
-						(clearForLanding(currentTileNumber + 7) && Tile.getCheckerTiles()[currentTileNumber + 14].hasChecker()))) {
+				if(((clearForLanding(currentTileNumber + 7) && Tile.getCheckerTiles()[currentTileNumber + 14].hasChecker()) ||
+						(clearForLanding(currentTileNumber + 18) && Tile.getCheckerTiles()[currentTileNumber + 9].hasChecker()))) {
 					return true;
 				}
 			}
 		} else if(c.isCrowned() && 
 				(((clearForLanding(currentTileNumber - 18) && Tile.getCheckerTiles()[currentTileNumber - 9].hasChecker()) ||
-						(clearForLanding(currentTileNumber - 7) && Tile.getCheckerTiles()[currentTileNumber - 14].hasChecker()))) ||
+						(clearForLanding(currentTileNumber - 14) && Tile.getCheckerTiles()[currentTileNumber - 7].hasChecker()))) ||
 						((clearForLanding(currentTileNumber + 18) && Tile.getCheckerTiles()[currentTileNumber + 9].hasChecker()) ||
-								(clearForLanding(currentTileNumber + 7) && Tile.getCheckerTiles()[currentTileNumber + 14].hasChecker()))) {
+								(clearForLanding(currentTileNumber + 14) && Tile.getCheckerTiles()[currentTileNumber + 7].hasChecker()))) {
 			return true;
 		} 
 
@@ -643,7 +648,8 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 		if(currentJumpingPiece != null && (currentJumpingPiece != c && currentJumpingPieceHasJumps())) {
 			println("The last jumping piece still has another jump.");
 			return false;
-		}
+		}	
+
 		if(!validMoveDirection(c)) {
 			return false;
 		}

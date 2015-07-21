@@ -1,0 +1,1 @@
+java -Xmx100m -classpath C:\Users\Adrian\git\Checkers\bin com.adrian.Main
