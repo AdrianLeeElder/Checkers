@@ -49,4 +49,12 @@ public class Tile extends Rectangle2D.Double {
   public boolean hasChecker() {
 	  return currentCheckerNumber != -1;
   }
+  
+  public boolean hasPlayerTwoChecker() {
+	  return (hasChecker() && Checker.getCheckers()[currentCheckerNumber].isPlayerTwoPiece());
+  }
+  
+  public boolean hasPlayerOneChecker() {
+	  return (hasChecker() && Checker.getCheckers()[currentCheckerNumber].isPlayerOnePiece());
+  }
 }
