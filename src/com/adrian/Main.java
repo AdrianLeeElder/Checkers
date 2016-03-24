@@ -25,7 +25,7 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	static double canvasHeight = (double) widthY - 100;//height of checker canvas
 	static int startingCheckerX = 50; //corner loc x of checker canvas
 	static int startingCheckerY = 50; //corner loc y of checker canvas
-	static boolean debugFeatures = false;
+	static boolean debugFeatures = true;
 	//spaces for checkers
 	private int mouseX = 0;
 	private int mouseY = 0;
@@ -112,6 +112,9 @@ public class Main extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		if(debugFeatures) {
+			println("-------------------------------");
+		}
 		if(menuShowing == true) {
 			if(comModeSelected(e.getX(), e.getY())) {
 				comMode = true;
@@ -628,12 +631,20 @@ private boolean clearForLanding(int tileNumber) {
 //	}
 
 private Checker currentJumpingPiece = null;
+private int[] nonJumpableTiles = {1, 3, 5, 7, 8, 24, 23, 40, 56, 39, 55, 58, 60, 62};
 
 private boolean hasJumps(Checker c) {
 	byte currentTileNumber = c.getCurrentTileNumber();
 	if(c == null) return false;
+	if(getMiddleTile(c) == null) return false;
 	
+	for(int i = 0; i < nonJumpableTiles.length; i++ ) {
+		if(getMiddleTile(c).getTileNumber() == nonJumpableTiles[i]) {
+			return false;
+		}
+	}
 	if(!c.isCrowned()) {
+
 		if(c.isPlayerOnePiece()) {
 			if((currentTileNumber - 14) > 0) {
 				if((clearForLanding(currentTileNumber - 14) && tileIsPlayable(currentTileNumber + 18)) && Tile.getCheckerTiles()[currentTileNumber - 7].hasPlayerTwoChecker()) {
@@ -669,6 +680,7 @@ private boolean hasJumps(Checker c) {
 }
 
 private boolean canJumpToTile(Checker c) {
+
 	if(currentJumpingPiece != null && (currentJumpingPiece != c && hasJumps(currentJumpingPiece))) {
 		println("The last jumping piece still has another jump.");
 		return false;
@@ -677,7 +689,8 @@ private boolean canJumpToTile(Checker c) {
 	if(!validMoveDirection(c)) {
 		return false;
 	}
-	if(turnMatchesChecker(c) && isDiagonalXTilesFromChecker(c, 2) && getMiddleTile(c).hasChecker() && clearForLanding(potentialTileNumber)) {
+	
+	if(turnMatchesChecker(c) && isDiagonalXTilesFromChecker(c, 2) && clearForLanding(potentialTileNumber)) {
 		println("Attempting to take jump");
 		currentJumpingPiece = c;//now the program knows the last jumping piece
 		return true;
