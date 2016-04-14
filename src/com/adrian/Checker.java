@@ -8,113 +8,132 @@ package com.adrian;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Checker extends Ellipse2D.Double {
-  private static Checker[] checkers = new Checker[24];
-  private static double checkerSize = Tile.getTileSize() - 20;
-  
-  private static double oldX, oldY = 0;
+public class Checker {
+	private static Checker[] checkers = new Checker[24];
+	private static double checkerWidth = Tile.getTileWidth() - 20;
+	private static double checkerHeight = Tile.getTileHeight() - 20;
 
-  private byte checkerNumber = 0;
-  
-  private boolean isSelected = false;
-  
-  private byte currentTileNumber = -1;
-  private boolean playerOnePiece = false;
-  private boolean playerTwoPiece = false;
-  private boolean crownedPiece = false;
-  
-  public Checker(double x, double y, double width, double height, boolean playerOne, boolean playerTwo) {
-    super(x, y, width, height);
-    
-    this.playerOnePiece = playerOne;
-    this.playerTwoPiece = playerTwo;
-  }
-    
-    public static Color getFillColorPlayerOne() {
-      return Color.white;
-    }
-    
-    public static Color getFillColorPlayerTwo() {
-      return Color.red;
-    }
-    
-    public static Color getCrownFillColorOne() {
-    	return Color.cyan;
-    }
-    
-    public static Color getCrownFillColorTwo() {
-    	return Color.green;
-    }
-    
-    public byte getCheckerNumber() {
-        return checkerNumber;
-    }
-    
-    public void setCheckerNumber(byte checkerNumber) {
-        this.checkerNumber = checkerNumber;
-    }
-    
-    public static double getCheckerSize() {
-        return checkerSize;
-    }
-    
-    public static void setOldX(double x) {
-        oldX = x;
-    }
-    
-    public static void setOldY(double y) {
-        oldY = y;
-    }
-    
-    public static double getOldX() {
-        return oldX;
-    }
-    
-    public static double getOldY() {
-        return oldY;
-    }
-    
-    public boolean isSelected() {
-        return this.isSelected;
-    }
-    
-    public void setSelected(boolean isSelected) {
-        this.isSelected = isSelected;
-    }
-    
-    public static Checker getSelectedChecker() {
-        for(Checker c: Checker.getCheckers()) {
-        	if(c == null) continue;
-            if(c.isSelected()) return c;
-        }
-        return null;
-    }
-    
-    public byte getCurrentTileNumber() {
-    	return currentTileNumber;
-    }
+	private static double oldX, oldY = 0;
 
-	public void setCurrentTile(byte i) {
+	private int checkerNumber = 0;
+
+	private boolean isSelected = false;
+
+	private int currentTileNumber = -1;
+	private boolean playerOnePiece = false;
+	private boolean playerTwoPiece = false;
+	private boolean crownedPiece = false;
+
+	private static BufferedImage checkerSprite = null;
+
+	double x;
+	private double y;
+
+	public Checker(double x, double y, boolean playerOne) {
+		setX(x);
+		setY(y);
+		
+		playerOnePiece = playerOne ? playerOne : false;
+		playerTwoPiece = playerOnePiece ? false : true;
+	}
+
+	public int getCheckerNumber() {
+		return checkerNumber;
+	}
+
+	public void setCheckerNumber(int i) {
+		this.checkerNumber = i;
+	}
+
+	public static void setOldX(double x) {
+		oldX = x;
+	}
+
+	public static void setOldY(double y) {
+		oldY = y;
+	}
+
+	public static double getOldX() {
+		return oldX;
+	}
+
+	public static double getOldY() {
+		return oldY;
+	}
+
+	public boolean isSelected() {
+		return this.isSelected;
+	}
+
+	public void setSelected(boolean isSelected) {
+		this.isSelected = isSelected;
+	}
+
+	public static Checker getSelectedChecker() {
+		for(Checker c: Checker.getCheckers()) {
+			if(c == null) continue;
+			if(c.isSelected()) return c;
+		}
+		return null;
+	}
+
+	public int getCurrentTileNumber() {
+		return currentTileNumber;
+	}
+
+	public void setCurrentTile(int i) {
 		currentTileNumber = i;	
 	}
-	
+
 	public boolean isPlayerOnePiece() {
 		return playerOnePiece;
 	}
-	
+
 	public boolean isPlayerTwoPiece() {
 		return playerTwoPiece;
 	}
-	
+
 	public static Checker[] getCheckers() {
 		return checkers;
 	}
-	
+
 	public boolean isCrowned() {
 		return crownedPiece;
 	}
+	
+	public double getCenterY() {
+		return (y + (checkerHeight / 2));
+	}
+	
+	public double getCenterX() {
+		return (x + (checkerWidth / 2));
+	}
 
+	public void setX(double x2) {
+		this.x = x2;
+	}
+
+	public void setY(double y2) {
+		this.y = y2;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public static double getCheckerHeight() {
+		return checkerHeight;
+	}
+
+	public static double getCheckerWidth() {
+		return checkerWidth;
+	}
 }
 

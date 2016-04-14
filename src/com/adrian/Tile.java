@@ -14,12 +14,17 @@ import java.awt.geom.*;
  */
 public class Tile extends Rectangle2D.Double {
   private byte tileNumber = 0;
-  private static double tileSize = (Main.canvasWidth / 8);
-  private static Tile[] checkerTiles = new Tile[64];
-  private byte currentCheckerNumber = -1;
   
+  private static double tileWidth = Main.canvasWidth / 10.48;
+
+  private static double tileHeight = Main.canvasHeight / 6.25;
+  
+  private static Tile[] checkerTiles = new Tile[32];
+  private int currentCheckerNumber = -1;
+    
   public Tile(double x, double y, double w, double h) {
-    super(x, y, w, h);
+    super(x, y, w, h);  
+   
   }
   
   public byte getTileNumber() {
@@ -34,16 +39,20 @@ public class Tile extends Rectangle2D.Double {
     this.tileNumber = i;
   }
   
-  public static double getTileSize() {
-    return tileSize;
+  public static double getTileHeight() {
+	  return tileHeight;
   }
   
-  public byte getCurrentCheckerNumber() {
+  public static double getTileWidth() {
+	  return tileWidth;
+  }
+  
+  public int getCurrentCheckerNumber() {
 	  return currentCheckerNumber;
   }
   
-  public void setCurrentCheckerNumber(byte number) {
-	  currentCheckerNumber = number;
+  public void setCurrentCheckerNumber(int i) {
+	  currentCheckerNumber = i;
   }
   
   public boolean hasChecker() {
