@@ -2,6 +2,7 @@ package com.adrian;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -9,6 +10,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -21,14 +24,14 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class Game extends JPanel implements MouseMotionListener, MouseListener {
-
+	private static Game game = null;
 	private int startingCheckerX = 50; //corner loc x of checker canvas
 	private int startingCheckerY = 50; //corner loc y of checker canvas
 
 	private final int COM_MODE = 0;
 	private final int TWO_PLAYER_MODE = 1;
 
-	private boolean debugFeatures = true;
+	private boolean debugFeatures = false;
 	//spaces for checkers
 	private int mouseX = 0;
 	private int mouseY = 0;
@@ -61,6 +64,18 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 	public Game() {
 		addMouseListener(this); 
 		addMouseMotionListener(this);
+		this.setLayout(new FlowLayout());
+		this.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				for(int i = 0; i < 32; i++) {
+					if(gameObjectsCreated) {
+						if(i == 0) setupForTileCreation();
+						createTiles(i);
+					}
+				}
+			}
+		});
+		game = this;
 	}
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -92,9 +107,9 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 
 		if(menuShowing == false) {
 			if(!gameObjectsCreated) {
+				offset = getWidth() / 14.3;
+				padding = getWidth() / 14.3;
 				createGameObjects(g2);
-			} else {
-				
 			}
 			drawObjects(g2);
 			addDebugFeatures(g2);
@@ -301,13 +316,25 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 	 * 
 	 */
 	public void createGameObjects(Graphics2D g2) {
+		setupForTileCreation();
 		for(int i = 0; i < 32; i++) {
-			createTiles(g2, i);
+			createTiles(i);
 			if(i < 12 || i > 19) {
 				createCheckers(i, g2);
 			}
 		}
-		
+
+	}
+	
+	/*
+	 * reset our accumulating variables
+	 */
+	public void setupForTileCreation() {
+		offset = getWidth() / 14.3;
+		padding = getWidth() / 14.3;
+		offsetCount = 0;
+		accumlativeColOffset = 0;
+		accumlativeRowOffset = 0;
 		gameObjectsCreated = true;
 	}
 	
@@ -320,15 +347,17 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 	}
 	
 	public void drawBoard(Graphics2D g2) {
-		g2.drawImage(Sprite.getSprite(Sprite.BOARD), 0, 0, this);
+		g2.drawImage(Sprite.getSprite(Sprite.BOARD), 0, 0, this.getWidth(), this.getHeight(), this);
 	}
 
 	//redraw the checkers without 
 	public void drawCheckers(Graphics2D g2) {
+		int checkerWidth = getWidth() / 14;
+		int checkerHeight = getHeight() / 12;
 		for(int i = 0; i < 24; i++) {
 			g2.drawImage(Checker.getCheckers()[i].isPlayerOnePiece() ? Sprite.getSprite(Sprite.CHECKER).getSubimage(0, 0, 61, 61) :
 																	   Sprite.getSprite(Sprite.CHECKER).getSubimage(62, 0, 61, 61)
-				,(int) Tile.getCheckerTiles()[i < 12 ? i : i + 8].x, (int) Tile.getCheckerTiles()[i < 12 ? i : i + 8].y, this);
+				,(int) Tile.getCheckerTiles()[i < 12 ? i : i + 8].x, (int) Tile.getCheckerTiles()[i < 12 ? i : i + 8].y + 10, checkerWidth , checkerHeight, this);
 		}
 	}
 
@@ -336,30 +365,26 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 		g2.setColor(Color.white);
 		for(int i = 0; i < 32; i++) {
 			g2.draw(Tile.getCheckerTiles()[i]);
-		}
+			System.out.println(Tile.getCheckerTiles()[i].toString());
+		}	
 	}
 
-	double offset = Tile.getTileWidth();
+	double offset;
+	double padding;
 	int offsetCount = 0;
-	double padding = Tile.getTileWidth() +1;
 	double accumlativeColOffset = 0;
 	double accumlativeRowOffset = 0;
-	public void createTiles(Graphics2D g2, int i) {
+	public void createTiles(int i) {
 		//start a new row, alternating the offset
 		if(offsetCount == 4) {
 			offset = (offset == 0? Tile.getTileWidth() : 0);
 			offsetCount = 0;
-			accumlativeColOffset += Tile.getTileHeight();
+			accumlativeColOffset += Tile.getTileHeight() - 1;
 			accumlativeRowOffset = 0;
 		}
 		
-		println(""+ Tile.getTileWidth());
-		println(""+ Tile.getTileHeight());
-		
-		Tile tile = new Tile((offsetCount == 0 ? offset : accumlativeRowOffset), accumlativeColOffset
-				,Tile.getTileWidth(), Tile.getTileHeight());
-		accumlativeRowOffset += (offsetCount == 0 ? offset : 0) + Tile.getTileWidth() + padding; //only add offset on first tile in row
-
+		Tile tile = new Tile((offsetCount == 0 ? offset : accumlativeRowOffset), accumlativeColOffset);
+		accumlativeRowOffset += (offsetCount == 0 ? offset : 0) + Tile.getTileWidth() + padding + .65; //only add offset on first tile in row
 		Tile.getCheckerTiles()[i] = tile;
 		offsetCount++;
 	}
@@ -370,10 +395,6 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 		checker.setCurrentTile(i);
 		Checker.getCheckers()[i < 12 ? i : i - 8] = checker;
 
-		if(debugFeatures) {
-			println("Rendered " + Checker.getCheckers().length + " checker(s) for player two");
-			println("Rendered " + Checker.getCheckers().length + " checker(s) for player one");
-		}
 	}
 
 	private void addDebugInfoToTiles(Graphics2D g2, int i) {
@@ -769,6 +790,10 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 			}
 		}
 		return -1;
+	}
+	
+	public static Game getGame() {
+		return game;
 	}
 
 	private boolean isPlayerOneTurn() {

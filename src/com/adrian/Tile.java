@@ -13,20 +13,27 @@ import java.awt.geom.*;
  * Auto Generated Java Class.
  */
 public class Tile extends Rectangle2D.Double {
-  private byte tileNumber = 0;
-  
-  private static double tileWidth = Main.canvasWidth / 10.48;
-
-  private static double tileHeight = Main.canvasHeight / 6.25;
+  private static byte tileNumberCounter = 0;
+  private byte tileNumber;
+  private static double tileWidth;
+  private static double tileHeight;
   
   private static Tile[] checkerTiles = new Tile[32];
   private int currentCheckerNumber = -1;
     
-  public Tile(double x, double y, double w, double h) {
-    super(x, y, w, h);  
-   
+  public Tile(double x, double y) {
+    super(x, y, tileWidth, tileHeight);  
+    tileNumberCounter++;
+    tileNumber = (byte) (tileNumberCounter + 1);
+    updateSize();
   }
-  
+  public void updateSize() {
+	  tileWidth = Game.getGame().getWidth() / 14.3;
+	  tileHeight = Game.getGame().getHeight() / 7.90;
+	  
+	  this.width = tileWidth;
+	  this.height = tileHeight; 
+  }
   public byte getTileNumber() {
     return this.tileNumber;
   }
@@ -41,6 +48,11 @@ public class Tile extends Rectangle2D.Double {
   
   public static double getTileHeight() {
 	  return tileHeight;
+  }
+  
+  public static void setTileSize(int width, int height) {
+	  tileWidth = width / 14.3;
+	  tileHeight = height / 8.25;
   }
   
   public static double getTileWidth() {
@@ -66,4 +78,9 @@ public class Tile extends Rectangle2D.Double {
   public boolean hasPlayerOneChecker() {
 	  return (hasChecker() && Checker.getCheckers()[currentCheckerNumber].isPlayerOnePiece());
   }
+  @Override
+public String toString() {
+	return "Tile [tileNumber=" + tileNumber + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
+}
+  
 }

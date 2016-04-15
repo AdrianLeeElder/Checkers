@@ -42,7 +42,6 @@ public class Main extends JFrame {
 		game = new Game();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setPreferredSize(new Dimension(widthX, widthY));
-		
 		this.getContentPane().add("Center", game);
 		this.setMinimumSize(new Dimension(minimumWidth, minimumHeight));
 		
