@@ -219,9 +219,11 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 						moveChecker(c, potentialTile);
 						
 						//prevent a checker from stopping a jump if it has more than one
-						for(int i = 0; i < 5; i++) {
+						for(int i = 0; i < 4; i++) {
 							if(hasJump(c, i, getTheoreticalPotentialTile(c, i))) {
 								println("Checker #"+ c.getCheckerNumber() +" needs to finish its jumps");
+								c.setSelected(false);
+								repaint();
 								return;
 							}
 						}
@@ -733,7 +735,7 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 		case SOUTH_WEST:
 			return getTileForPoint(new Point((int) (c.getX() - (getTileWidth() * 2) + 10), (int) (c.getY() + (getTileHeight() * 2) + 10)));
 		case SOUTH_EAST:
-			return getTileForPoint(new Point((int) (c.getX() + (getTileWidth() * 2) + 10), (int) (c.getY() - (getTileHeight() * 2) + 10)));
+			return getTileForPoint(new Point((int) (c.getX() + (getTileWidth() * 2) + 10), (int) (c.getY() + (getTileHeight() * 2) + 10)));
 		}
 
 		return null;
