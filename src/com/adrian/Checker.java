@@ -28,7 +28,7 @@ public class Checker extends Ellipse2D.Double {
 
 	public Checker(double x, double y, boolean playerOnePiece, int checkerNumber, int currentTileNumber) {
 		super(x, y, Game.getCheckerWidth(), Game.getCheckerHeight());
-		
+
 		this.checkerNumber = checkerNumber;
 		this.playerOnePiece = playerOnePiece;
 		this.playerTwoPiece = !playerOnePiece;
@@ -75,6 +75,9 @@ public class Checker extends Ellipse2D.Double {
 		return null;
 	}
 
+	public void setCrowned(boolean crowned) {
+		crownedPiece = crowned;
+	}
 	public int getCurrentTileNumber() {
 		return currentTileNumber;
 	}
@@ -105,11 +108,11 @@ public class Checker extends Ellipse2D.Double {
 	public boolean isCrowned() {
 		return crownedPiece;
 	}
-	
+
 	public double getCenterY() {
 		return (y + (Game.getCheckerHeight() / 2));
 	}
-	
+
 	public double getCenterX() {
 		return (x + (Game.getCheckerWidth() / 2));
 	}
@@ -124,9 +127,9 @@ public class Checker extends Ellipse2D.Double {
 
 	public static BufferedImage getCheckerSprite(Checker c) {
 		if(c.isPlayerOnePiece()) {
-			return Sprite.getSprite(Sprite.CHECKER).getSubimage(0, 0, 305,305);
+			return Sprite.getSprite((!c.isCrowned() ? Sprite.CHECKER : Sprite.CHECKER_CROWNED)).getSubimage(0, 0, 305,305);
 		} else {
-			return Sprite.getSprite(Sprite.CHECKER).getSubimage(310, 0, 305,305);
+			return Sprite.getSprite((!c.isCrowned() ? Sprite.CHECKER : Sprite.CHECKER_CROWNED)).getSubimage(310, 0, 305,305);
 		}
 	}
 }

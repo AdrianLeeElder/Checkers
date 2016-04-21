@@ -10,8 +10,8 @@ import javax.imageio.ImageIO;
 public class Sprite {
 	private BufferedImage sprite;
 	private static ArrayList<BufferedImage> sprites = new ArrayList<BufferedImage>();
-	private final int SPRITE_COUNT = 2;
-	public final static int BOARD = 0, CHECKER = 1;
+	private final int SPRITE_COUNT = 3;
+	public final static int BOARD = 0, CHECKER = 1, CHECKER_CROWNED = 2;
 	
 	public Sprite() {
 		try {

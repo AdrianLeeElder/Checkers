@@ -528,13 +528,14 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 		for (Checker c : Checker.getCheckers()) {
 			if(c == null) continue;
 			g2.setColor(Color.black);
-			g2.fillRect((int) c.getCenterX() - 7, (int) c.getCenterY() - 15, 45, 42);
+			g2.fillRect((int) c.getCenterX() - 7, (int) c.getCenterY() - 15, 75, 52);
 
 			g2.setColor(Color.white);
 			g2.drawString("#"+ c.getCheckerNumber(), (int) c.getCenterX(), (int) c.getCenterY() - 5);
 			g2.drawString(""+ c.isSelected(), (int) c.getCenterX() - 5, (int) c.getCenterY() + 5 );
 			g2.drawString("x="+ (int) c.x, (int) c.getCenterX(), (int) c.getCenterY() + 15);
 			g2.drawString("y="+ (int) c.y, (int) c.getCenterX(), (int) c.getCenterY() + 25);
+			g2.drawString("Crwnd: "+c.isCrowned(), (int) c.getCenterX(), (int) c.getCenterY() + 35);
 		}
 	}
 
@@ -630,8 +631,10 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 
 			if((isPlayerTurn(c2))) {
 				for(int i = 0; i < 5; i ++) {
-					if(isPlayerOneTurn && i > 1)  continue;
-					if(isPlayerTwoTurn && i < 2) continue;
+					if(!c.isCrowned()) {
+						if(isPlayerOneTurn && i > 1)  continue;
+						if(isPlayerTwoTurn && i < 2) continue;
+					}
 					if(hasJump(c2, i, getTheoreticalPotentialTile(c2, i))) {
 						println("Checker " +c2.getCheckerNumber() + " has a jump in direction " + i);
 						return false;
@@ -643,14 +646,18 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 	}
 
 	private boolean validMoveDirection(Checker c) {
-		if(c.isPlayerOnePiece()) {
-			if(moveDirection == 0 || moveDirection == 1) {
-				return true;
+		if(!c.isCrowned()) {
+			if(c.isPlayerOnePiece()) {
+				if(moveDirection == 0 || moveDirection == 1) {
+					return true;
+				}
+			} else {
+				if(moveDirection == 2 || moveDirection == 3) {
+					return true;
+				}
 			}
 		} else {
-			if(moveDirection == 2 || moveDirection == 3) {
-				return true;
-			}
+			return true;
 		}
 		
 		return false;
@@ -686,7 +693,24 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 		potentialTile.setCurrentCheckerNumber(c.getCheckerNumber());
 
 		c.setCurrentTileNumber(potentialTile.getTileNumber());
+		checkCrowned(c);
 		println("Attempting to move to tile " + potentialTile.toString());
+	}
+	
+	private int[] playerOneCrownTiles = {0, 1, 2, 3};
+	private int[] playerTwoCrownTiles = {28, 29, 30, 31};
+	public void checkCrowned(Checker c) {
+		for(int i = 0; i < 4; i++) {
+			if(c.isPlayerOnePiece()) {
+				if(c.getCurrentTileNumber() == playerOneCrownTiles[i]) {
+					c.setCrowned(true);
+				}
+			} else {
+				if(c.getCurrentTileNumber() == playerTwoCrownTiles[i]) {
+					c.setCrowned(true);
+				}
+			}
+ 		}
 	}
 
 	private void removeChecker(Checker c) {
