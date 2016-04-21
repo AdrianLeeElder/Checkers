@@ -26,8 +26,8 @@ public class Main extends JFrame {
 	private static int widthX = 1100;
 	private static int widthY = 700;
 	
-	public static final double canvasWidth = (double) widthX - 100;//width of checker canvas
-	public static final double canvasHeight = (double) widthY - 100;//height of checker canvas
+	private boolean fullScreen = false;
+	
 	static double version = 1.0;
 
 	
@@ -41,7 +41,7 @@ public class Main extends JFrame {
 	public void init() {
 		game = new Game();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setPreferredSize(new Dimension(widthX, widthY));
+		this.setPreferredSize(fullScreen ? new Dimension(Toolkit.getDefaultToolkit().getScreenSize()) : new Dimension(widthX, widthY));
 		this.getContentPane().add("Center", game);
 		this.setMinimumSize(new Dimension(minimumWidth, minimumHeight));
 		

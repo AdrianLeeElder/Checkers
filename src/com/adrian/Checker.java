@@ -11,10 +11,8 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Checker {
+public class Checker extends Ellipse2D.Double {
 	private static Checker[] checkers = new Checker[24];
-	private static double checkerWidth = Tile.getTileWidth() - 20;
-	private static double checkerHeight = Tile.getTileHeight() - 20;
 
 	private static double oldX, oldY = 0;
 
@@ -27,17 +25,14 @@ public class Checker {
 	private boolean playerTwoPiece = false;
 	private boolean crownedPiece = false;
 
-	private static BufferedImage checkerSprite = null;
 
-	double x;
-	private double y;
-
-	public Checker(double x, double y, boolean playerOne) {
-		setX(x);
-		setY(y);
+	public Checker(double x, double y, boolean playerOnePiece, int checkerNumber, int currentTileNumber) {
+		super(x, y, Game.getCheckerWidth(), Game.getCheckerHeight());
 		
-		playerOnePiece = playerOne ? playerOne : false;
-		playerTwoPiece = playerOnePiece ? false : true;
+		this.checkerNumber = checkerNumber;
+		this.playerOnePiece = playerOnePiece;
+		this.playerTwoPiece = !playerOnePiece;
+		this.currentTileNumber = currentTileNumber;
 	}
 
 	public int getCheckerNumber() {
@@ -84,8 +79,15 @@ public class Checker {
 		return currentTileNumber;
 	}
 
-	public void setCurrentTile(int i) {
+	public void setCurrentTileNumber(int i) {
 		currentTileNumber = i;	
+	}
+
+	@Override
+	public String toString() {
+		return "Checker [checkerNumber=" + checkerNumber + ", currentTileNumber=" + currentTileNumber
+				+ ", playerOnePiece=" + playerOnePiece + ", playerTwoPiece=" + playerTwoPiece + ", crownedPiece="
+				+ crownedPiece + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
 	}
 
 	public boolean isPlayerOnePiece() {
@@ -105,11 +107,11 @@ public class Checker {
 	}
 	
 	public double getCenterY() {
-		return (y + (checkerHeight / 2));
+		return (y + (Game.getCheckerHeight() / 2));
 	}
 	
 	public double getCenterX() {
-		return (x + (checkerWidth / 2));
+		return (x + (Game.getCheckerWidth() / 2));
 	}
 
 	public void setX(double x2) {
@@ -120,20 +122,12 @@ public class Checker {
 		this.y = y2;
 	}
 
-	public double getY() {
-		return y;
-	}
-
-	public double getX() {
-		return x;
-	}
-
-	public static double getCheckerHeight() {
-		return checkerHeight;
-	}
-
-	public static double getCheckerWidth() {
-		return checkerWidth;
+	public static BufferedImage getCheckerSprite(Checker c) {
+		if(c.isPlayerOnePiece()) {
+			return Sprite.getSprite(Sprite.CHECKER).getSubimage(0, 0, 305,305);
+		} else {
+			return Sprite.getSprite(Sprite.CHECKER).getSubimage(310, 0, 305,305);
+		}
 	}
 }
 

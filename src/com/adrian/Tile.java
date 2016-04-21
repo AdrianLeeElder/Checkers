@@ -14,27 +14,18 @@ import java.awt.geom.*;
  */
 public class Tile extends Rectangle2D.Double {
   private static byte tileNumberCounter = 0;
-  private byte tileNumber;
-  private static double tileWidth;
-  private static double tileHeight;
-  
+  private int tileNumber;
+ 
   private static Tile[] checkerTiles = new Tile[32];
   private int currentCheckerNumber = -1;
     
-  public Tile(double x, double y) {
-    super(x, y, tileWidth, tileHeight);  
-    tileNumberCounter++;
-    tileNumber = (byte) (tileNumberCounter + 1);
-    updateSize();
+  public Tile(double x, double y, int i) {
+    super(x, y, Game.getTileWidth(), Game.getTileHeight());  
+    
+    tileNumber = i;
   }
-  public void updateSize() {
-	  tileWidth = Game.getGame().getWidth() / 14.3;
-	  tileHeight = Game.getGame().getHeight() / 7.90;
-	  
-	  this.width = tileWidth;
-	  this.height = tileHeight; 
-  }
-  public byte getTileNumber() {
+
+  public int getTileNumber() {
     return this.tileNumber;
   }
   
@@ -46,17 +37,12 @@ public class Tile extends Rectangle2D.Double {
     this.tileNumber = i;
   }
   
-  public static double getTileHeight() {
-	  return tileHeight;
+  public double getHeight() {
+	  return Game.getGame().getHeight() / 7.90;
   }
   
-  public static void setTileSize(int width, int height) {
-	  tileWidth = width / 14.3;
-	  tileHeight = height / 8.25;
-  }
-  
-  public static double getTileWidth() {
-	  return tileWidth;
+  public double getWidth() {
+	  return Game.getGame().getWidth() / 14.3;
   }
   
   public int getCurrentCheckerNumber() {
