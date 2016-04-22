@@ -816,7 +816,7 @@ public class Game extends JPanel implements MouseMotionListener, MouseListener {
 	}
 
 	/*
-	 * Game piece sizing
+	 * Game piece sizing 
 	 */
 
 	public static double getCheckerHeight() {
